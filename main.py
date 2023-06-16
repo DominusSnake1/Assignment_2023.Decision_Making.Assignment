@@ -1,8 +1,7 @@
 import Utils.connection as uticon
 import Utils.tables as utitab
-import Utils.randomData
+import Utils.insertData as utiran
 
 uticon.testConnection()
 utitab.createTables()
-Utils.randomData.test()
-
+utiran.insertRandomUserData(20)

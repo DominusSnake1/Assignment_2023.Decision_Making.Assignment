@@ -9,8 +9,7 @@ TABLES = {
                 user_id INT AUTO_INCREMENT PRIMARY KEY,
                 username VARCHAR(50),
                 age INT,
-                gender VARCHAR(10),
-                location VARCHAR(50)
+                gender CHAR(1) CHECK (gender = 'M' or gender = 'F')
             )
         """
     ),
@@ -30,6 +29,26 @@ TABLES = {
                 title VARCHAR(100),
                 band_id INT,
                 FOREIGN KEY (band_id) REFERENCES bands(band_id)
+            )
+        """
+    ),
+    'userLikes': (
+        """
+            CREATE TABLE userLikes (
+                user_id INT,
+                band_id INT,
+                FOREIGN KEY (user_id) REFERENCES Users (user_id),
+                FOREIGN KEY (band_id) REFERENCES Bands (band_id)
+            )
+        """
+    ),
+    'userOwnsAlbum': (
+        """
+            CREATE TABLE userOwnsAlbum (
+                user_id INT,
+                album_id INT,
+                FOREIGN KEY (user_id) REFERENCES Users (user_id),
+                FOREIGN KEY (album_id) REFERENCES Albums (album_id)
             )
         """
     )}

@@ -19,6 +19,10 @@ def __getDBCursor():
     return cursor
 
 
+def __commitDB():
+    cnx.commit()
+
+
 def testConnection():
     global cnx
     try:
@@ -33,6 +37,7 @@ def testConnection():
         else:
             print(err)
     else:
+        print("Successfully connected to the database!")
         con.close()
 
 
