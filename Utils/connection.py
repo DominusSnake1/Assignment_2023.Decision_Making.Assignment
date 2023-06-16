@@ -16,6 +16,7 @@ def __getDBName():
 
 def __getDBCursor():
     cursor = cnx.cursor()
+    cursor.execute("USE {}".format(__getDBName()))
     return cursor
 
 
@@ -44,16 +45,9 @@ def testConnection():
 def createDatabase():
     cursor = __getDBCursor()
     try:
+        cursor.execute("CREATE DATABASE IF NOT EXISTS {} DEFAULT CHARACTER SET 'utf8'".format(__getDBName()))
+        print("Database \"{}\" was created successfully!".format(__getDBName()))
         cursor.execute("USE {}".format(__getDBName()))
     except sqlcon.Error as err:
-        if err.errno == errorcode.ER_BAD_DB_ERROR:
-            try:
-                cursor.execute("CREATE DATABASE IF NOT EXISTS {} DEFAULT CHARACTER SET 'utf8'".format(__getDBName()))
-                print("Database \"{}\" was created successfully!".format(__getDBName()))
-                cursor.execute("USE {}".format(__getDBName()))
-            except sqlcon.Error as err:
-                print("Failed creating/accessing database: {}".format(err))
-                exit(1)
-        else:
-            print(err)
-            exit(1)
+        print("Failed creating/accessing database: {}".format(err))
+        exit(1)

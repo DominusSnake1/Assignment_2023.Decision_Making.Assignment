@@ -4,7 +4,6 @@ import Utils.connection as uticon
 
 def insertRandomUsers(users):
     cursor = uticon.__getDBCursor()
-    cursor.execute("USE {}".format(uticon.__getDBName()))
 
     usernames = ['user{}'.format(i) for i in range(users)]
 
@@ -22,6 +21,15 @@ def insertRandomUsers(users):
 
     uticon.__commitDB()
     cursor.close()
+
+
+def insertBands():
+    cursor = uticon.__getDBCursor()
+
+    bands = ['Moderat', 'Tale Of Us', 'Artic Monkeys', 'The Weeknd', '', '']
+
+    addBand = "INSERT INTO bands (name, genre) VALUES (%(name)s, %(genre)s)"
+
 
 
 

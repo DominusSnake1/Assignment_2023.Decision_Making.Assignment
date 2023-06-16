@@ -4,4 +4,4 @@ import Utils.insertData as utiran
 
 uticon.testConnection()
 utitab.createTables()
-utiran.insertRandomUserData(20)
+utiran.insertRandomUsers(20)
