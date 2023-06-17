@@ -16,8 +16,20 @@ def __getDBName():
 
 def __getDBCursor():
     cursor = cnx.cursor()
-    cursor.execute("USE {}".format(__getDBName()))
+    try:
+        cursor.execute("USE {}".format(__getDBName()))
+    except sqlcon.Error as err:
+        print(err)
+
     return cursor
+
+
+def __getSQLConError():
+    return sqlcon.Error
+
+
+def __getSQLConErrorcode():
+    return sqlcon.errorcode
 
 
 def __commitDB():

@@ -15,9 +15,9 @@ TABLES = {
     ),
     'bands': (
         """
-            CREATE TABLE bands (
-                band_id INT AUTO_INCREMENT PRIMARY KEY,
-                name VARCHAR(100),
+            CREATE TABLE artists (
+                artist_id INT AUTO_INCREMENT PRIMARY KEY,
+                name VARCHAR(100) UNIQUE,
                 genre VARCHAR(50)
             )
         """
@@ -27,8 +27,9 @@ TABLES = {
             CREATE TABLE albums (
                 album_id INT AUTO_INCREMENT PRIMARY KEY,
                 title VARCHAR(100),
-                band_id INT,
-                FOREIGN KEY (band_id) REFERENCES bands(band_id)
+                artist_id INT,
+                FOREIGN KEY (artist_id) REFERENCES artists(artist_id),
+                CONSTRAINT UC_Album UNIQUE (title, artist_id)
             )
         """
     ),
@@ -36,9 +37,9 @@ TABLES = {
         """
             CREATE TABLE userLikes (
                 user_id INT,
-                band_id INT,
-                FOREIGN KEY (user_id) REFERENCES Users (user_id),
-                FOREIGN KEY (band_id) REFERENCES Bands (band_id)
+                artist_id INT,
+                FOREIGN KEY (user_id) REFERENCES users (user_id),
+                FOREIGN KEY (artist_id) REFERENCES artists (artist_id)
             )
         """
     ),
@@ -47,8 +48,8 @@ TABLES = {
             CREATE TABLE userOwnsAlbum (
                 user_id INT,
                 album_id INT,
-                FOREIGN KEY (user_id) REFERENCES Users (user_id),
-                FOREIGN KEY (album_id) REFERENCES Albums (album_id)
+                FOREIGN KEY (user_id) REFERENCES users (user_id),
+                FOREIGN KEY (album_id) REFERENCES albums (album_id)
             )
         """
     )}
@@ -61,14 +62,13 @@ def createTables():
     for tableName in TABLES:
         tableDescription = TABLES[tableName]
         try:
-            print("Creating table \"{}\".".format(tableName))
             cursor.execute(tableDescription)
         except sqlcon.Error as err:
             if err.errno == errorcode.ER_TABLE_EXISTS_ERROR:
-                print("Table \"{}\" already exists.".format(tableName))
+                print("[Table] \"{}\" already exists.".format(tableName))
             else:
                 print(err.msg)
         else:
-            print("Table \"{}\" created.".format(tableName))
+            print("[Table] \"{}\" created.".format(tableName))
 
     cursor.close()

@@ -1,7 +1,7 @@
 import Utils.connection as uticon
 import Utils.tables as utitab
-import Utils.insertData as utiran
+import Utils.insertData as utidat
 
 uticon.testConnection()
 utitab.createTables()
-utiran.insertAllData(20)
+utidat.insertDataInDB()

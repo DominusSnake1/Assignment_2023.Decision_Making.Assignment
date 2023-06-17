@@ -2,36 +2,25 @@ import random
 import Utils.connection as uticon
 
 
-def insertAllData(users):
-    insertRandomUsers(users)
-    insertBands()
+def insertDataInDB():
+    insertArtists()
+    insertAlbums()
+
+    userinput = input("\nDo you want random user data? (Yes / No):\n")
+
+    if userinput.lower() == 'yes':
+        howMany = int(input("How many randomly generated users do you want?\n"))
+
+        print("Creating {} random users...".format(howMany))
+        insertRandomUsers(howMany)
+        insertRandomUserLikes(howMany)
+        insertUserOwnsAlbum()
 
 
-def insertRandomUsers(users):
+def insertArtists():
     cursor = uticon.__getDBCursor()
 
-    usernames = ['user{}'.format(i) for i in range(users)]
-
-    addUser = "INSERT INTO users (username, age, gender) VALUES (%(username)s, %(age)s, %(gender)s)"
-
-    for user in usernames:
-        dataUser = {
-            'username': user,
-            'age': random.randint(18, 65),
-            'gender': random.choice(['M', 'F'])
-        }
-
-        cursor.execute(addUser, dataUser)
-        print("User \"{}\" inserted.".format(user))
-
-    uticon.__commitDB()
-    cursor.close()
-
-
-def insertBands():
-    cursor = uticon.__getDBCursor()
-
-    bands = {
+    artists = {
         'Moderat': 'Dance/Electronic',
         'Tale Of Us': 'Melodic Techno',
         'Artic Monkeys': 'Indie Rock',
@@ -40,17 +29,133 @@ def insertBands():
         'NSYNC': 'Pop'
     }
 
-    addBand = "INSERT INTO bands (name, genre) VALUES (%(name)s, %(genre)s)"
+    addArtist = "INSERT INTO artists (name, genre) VALUES (%(name)s, %(genre)s)"
 
-    for band, genre in bands:
-        dataBand = {
-            'name': band,
+    for artist, genre in artists.items():
+        dataArtist = {
+            'name': artist,
             'genre': genre
         }
 
-        cursor.execute(addBand, dataBand)
-        print("\"{}\" successfully inserted!".format(band))
+        try:
+            cursor.execute(addArtist, dataArtist)
+        except uticon.__getSQLConError() as err:
+            if err.errno == uticon.__getSQLConErrorcode().ER_DUP_ENTRY:
+                print("[Artist] \"{}\" already exists.".format(artist))
+        else:
+            print("[Artist] \"{}\" successfully inserted!".format(artist))
 
     uticon.__commitDB()
     cursor.close()
 
+
+def insertAlbums():
+    cursor = uticon.__getDBCursor()
+
+    albums = {
+        'Moderat': 'II',
+        'Tale of Us': 'Unity',
+        'Artic Monkeys': 'AM',
+        'The Weeknd': 'After Hours',
+        'ACDC': 'Back in Black',
+        'NSYNC': 'No Strings Attached'
+    }
+
+    addAlbum = "INSERT INTO albums (title, artist_id) VALUES (%(title)s, (SELECT artist_id FROM artists WHERE artists.name = %(artist)s))"
+
+    for artist, album in albums.items():
+        dataAlbum = {
+            'title': album,
+            'artist': artist
+        }
+
+        try:
+            cursor.execute(addAlbum, dataAlbum)
+        except uticon.__getSQLConError() as err:
+            if err.errno == uticon.__getSQLConErrorcode().ER_DUP_ENTRY:
+                print("[Album] \"{}\" by \"{}\" already exists.".format(album, artist))
+        else:
+            print("[Album] \"{}\" by \"{}\" inserted.".format(album, artist))
+
+    uticon.__commitDB()
+    cursor.close()
+
+
+def insertRandomUsers(users):
+    cursor = uticon.__getDBCursor()
+
+    usernames = ['Nancy', 'George', 'Freddie', 'Maggie', 'Rick',
+                 'Negan', 'Michonne', 'Lillian', 'Andrea', 'Daryl',
+                 'Natalie', 'Carl', 'Glenn', 'Lester', 'Lori',
+                 'George', 'Alex', 'James', 'Nick', 'John']
+
+    addUser = "INSERT INTO users (username, age, gender) VALUES (%(username)s, %(age)s, %(gender)s)"
+
+    for user in range(0, users):
+        username = random.choice(usernames)
+
+        dataUser = {
+            'username': username,
+            'age': random.randint(18, 65),
+            'gender': random.choice(['M', 'F'])
+        }
+
+        cursor.execute(addUser, dataUser)
+        print("[User] \"{}\" inserted.".format(username))
+
+    uticon.__commitDB()
+    cursor.close()
+
+
+def insertRandomUserLikes(num_likes):
+    cursor = uticon.__getDBCursor()
+
+    cursor.execute("SELECT user_id FROM Users")
+    user_ids = [row[0] for row in cursor.fetchall()]
+
+    cursor.execute("SELECT artist_id FROM artists")
+    artist_ids = [row[0] for row in cursor.fetchall()]
+
+    addUserLikes = "INSERT INTO userLikes (user_id, artist_id) VALUES (%(user_id)s, %(artist_id)s)"
+
+    for _ in range(num_likes):
+        user_id = random.choice(user_ids)
+        artist_id = random.choice(artist_ids)
+
+        dataUserLikes = {
+            'user_id': user_id,
+            'artist_id': artist_id
+        }
+
+        cursor.execute(addUserLikes, dataUserLikes)
+        print("[User] with ID \"{}\" likes [Artist] with ID \"{}\".".format(user_id, artist_id))
+
+    uticon.__commitDB()
+    cursor.close()
+
+
+def insertUserOwnsAlbum():
+    cursor = uticon.__getDBCursor()
+
+    cursor.execute("SELECT user_id FROM users")
+    user_ids = [row[0] for row in cursor.fetchall()]
+
+    cursor.execute("SELECT album_id FROM albums")
+    album_ids = [row[0] for row in cursor.fetchall()]
+
+    addOwnership = "INSERT INTO userOwnsAlbum (user_id, album_id) VALUES (%(user_id)s, %(album_id)s)"
+
+    for _ in range(len(user_ids)):
+        user_id = random.choice(user_ids)
+        album_id = random.choice(album_ids)
+
+        dataOwnership = {
+            'user_id': user_id,
+            'album_id': album_id
+        }
+
+        cursor.execute(addOwnership, dataOwnership)
+        print("[User] with ID \"{}\" owns [Album] with ID \"{}\".".format(user_id, album_id))
+
+    uticon.__commitDB()
+    cursor.close()
