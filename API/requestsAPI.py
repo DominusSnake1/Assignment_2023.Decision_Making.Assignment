@@ -1,27 +1,52 @@
 import requests
 import json
 
+API_KEY = 'bd4b05c8898a3da836213a90623338b7'
 
-def lastfm_Get(payload):
-    # define headers and URL
-    headers = {'user-agent': 'DeciMak'}
+
+def __getArtistsInfo(method, artist):
     url = 'https://ws.audioscrobbler.com/2.0/'
 
-    # Add API key and format to the payload
-    payload['api_key'] = 'bd4b05c8898a3da836213a90623338b7'
-    payload['format'] = 'json'
+    payload = {
+        'method': 'artist.{}'.format(method),
+        'artist': artist,
+        'api_key': API_KEY,
+        'format': 'json'
+    }
 
-    response = requests.get(url, headers=headers, params=payload)
+    response = json.loads(requests.get(url, params=payload).text)
     return response
 
 
-def jprint(obj):
-    # create a formatted string of the Python JSON object
-    text = json.dumps(obj, sort_keys=True, indent=4)
-    print(text)
+def getArtistsGenre(artist):
+    genre = __getArtistsInfo('getInfo', artist)['artist']['tags']['tag'][0]['name']
+
+    return genre
 
 
-r = lastfm_Get({'method': 'chart.gettopartists'})
-jprint(r.json())
-jprint(r.json()['artists']['@attr'])
-print(r.status_code)
+def __getTopArtists(howMany):
+    url = 'https://ws.audioscrobbler.com/2.0/'
+
+    payload = {
+        'method': 'chart.getTopArtists',
+        'api_key': API_KEY,
+        'format': 'json'
+    }
+
+    response = json.loads(requests.get(url, params=payload).text)
+
+    topArtists = []
+
+    for i in range(0, howMany):
+        name = response['artists']['artist'][i]['name']
+        genre = getArtistsGenre(name)
+        topArtists.append({'name': name, 'genre': genre})
+
+    return topArtists
+
+
+def getTopAlbum(artist):
+    info = __getArtistsInfo('getTopAlbums', artist)
+
+    return info['topalbums']['album'][0]['name']
+

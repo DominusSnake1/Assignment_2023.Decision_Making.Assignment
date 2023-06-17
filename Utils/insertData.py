@@ -1,5 +1,6 @@
 import random
 import Utils.connection as uticon
+import API.requestsAPI as api
 
 
 def insertDataInDB():
@@ -20,20 +21,16 @@ def insertDataInDB():
 def insertArtists():
     cursor = uticon.__getDBCursor()
 
-    artists = {
-        'Moderat': 'Dance/Electronic',
-        'Tale Of Us': 'Melodic Techno',
-        'Artic Monkeys': 'Indie Rock',
-        'The Weeknd': 'Pop',
-        'ACDC': 'Heavy Metal',
-        'NSYNC': 'Pop'
-    }
+    artists = api.__getTopArtists(10)
 
     addArtist = "INSERT INTO artists (name, genre) VALUES (%(name)s, %(genre)s)"
 
-    for artist, genre in artists.items():
+    for artist in artists:
+        name = artist['name']
+        genre = artist['genre']
+
         dataArtist = {
-            'name': artist,
+            'name': name,
             'genre': genre
         }
 
@@ -41,9 +38,9 @@ def insertArtists():
             cursor.execute(addArtist, dataArtist)
         except uticon.__getSQLConError() as err:
             if err.errno == uticon.__getSQLConErrorcode().ER_DUP_ENTRY:
-                print("[Artist] \"{}\" already exists.".format(artist))
+                print("[Artist] \"{}\" already exists.".format(name))
         else:
-            print("[Artist] \"{}\" successfully inserted!".format(artist))
+            print("[Artist] \"{}\" successfully inserted!".format(name))
 
     uticon.__commitDB()
     cursor.close()
@@ -52,18 +49,13 @@ def insertArtists():
 def insertAlbums():
     cursor = uticon.__getDBCursor()
 
-    albums = {
-        'Moderat': 'II',
-        'Tale of Us': 'Unity',
-        'Artic Monkeys': 'AM',
-        'The Weeknd': 'After Hours',
-        'ACDC': 'Back in Black',
-        'NSYNC': 'No Strings Attached'
-    }
+    cursor.execute("SELECT name FROM artists")
+    artists = [row[0] for row in cursor.fetchall()]
 
     addAlbum = "INSERT INTO albums (title, artist_id) VALUES (%(title)s, (SELECT artist_id FROM artists WHERE artists.name = %(artist)s))"
 
-    for artist, album in albums.items():
+    for artist in artists:
+        album = api.getTopAlbum(artist)
         dataAlbum = {
             'title': album,
             'artist': artist
