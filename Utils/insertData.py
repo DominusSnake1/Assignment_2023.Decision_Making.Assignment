@@ -34,6 +34,8 @@ def insertArtists():
             'genre': genre
         }
 
+        insertGenre(genre)
+
         try:
             cursor.execute(addArtist, dataArtist)
         except uticon.__getSQLConError() as err:
@@ -41,6 +43,29 @@ def insertArtists():
                 print("[Artist] \"{}\" already exists.".format(name))
         else:
             print("[Artist] \"{}\" successfully inserted!".format(name))
+
+    uticon.__commitDB()
+    cursor.close()
+
+
+def insertGenre(genre):
+    cursor = uticon.__getDBCursor()
+
+    addGenre = "INSERT INTO genres (genre) VALUES (%(genre)s)"
+
+    dataGenre = {
+        'genre': genre
+    }
+
+    try:
+        cursor.execute(addGenre, dataGenre)
+    except uticon.__getSQLConError() as err:
+        if err.errno == uticon.__getSQLConErrorcode().ER_DUP_ENTRY:
+            print("[Genre] \"{}\" already exists.".format(genre))
+        else:
+            print(err.msg)
+    else:
+        print("[Genre] \"{}\" successfully inserted!".format(genre))
 
     uticon.__commitDB()
     cursor.close()
@@ -76,10 +101,12 @@ def insertAlbums():
 def insertRandomUsers(users):
     cursor = uticon.__getDBCursor()
 
-    usernames = ['Nancy', 'George', 'Freddie', 'Maggie', 'Rick',
-                 'Negan', 'Michonne', 'Lillian', 'Andrea', 'Daryl',
-                 'Natalie', 'Carl', 'Glenn', 'Lester', 'Lori',
-                 'George', 'Alex', 'James', 'Nick', 'John']
+    usernames = [
+        'Nancy', 'George', 'Freddie', 'Maggie', 'Rick',
+        'Negan', 'Michonne', 'Lillian', 'Andrea', 'Daryl',
+        'Natalie', 'Carl', 'Glenn', 'Lester', 'Lori',
+        'George', 'Alex', 'James', 'Nick', 'John'
+    ]
 
     addUser = "INSERT INTO users (username, age, gender) VALUES (%(username)s, %(age)s, %(gender)s)"
 

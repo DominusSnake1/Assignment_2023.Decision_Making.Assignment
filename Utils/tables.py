@@ -13,7 +13,7 @@ TABLES = {
             )
         """
     ),
-    'bands': (
+    'artists': (
         """
             CREATE TABLE artists (
                 artist_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -28,7 +28,7 @@ TABLES = {
                 album_id INT AUTO_INCREMENT PRIMARY KEY,
                 title VARCHAR(100),
                 artist_id INT,
-                FOREIGN KEY (artist_id) REFERENCES artists(artist_id),
+                FOREIGN KEY (artist_id) REFERENCES artists (artist_id),
                 CONSTRAINT UC_Album UNIQUE (title, artist_id)
             )
         """
@@ -50,6 +50,14 @@ TABLES = {
                 album_id INT,
                 FOREIGN KEY (user_id) REFERENCES users (user_id),
                 FOREIGN KEY (album_id) REFERENCES albums (album_id)
+            )
+        """
+    ),
+    'genres': (
+        """
+            CREATE TABLE genres (
+                genre_id INT AUTO_INCREMENT PRIMARY KEY,
+                genre VARCHAR(50) UNIQUE
             )
         """
     )}
