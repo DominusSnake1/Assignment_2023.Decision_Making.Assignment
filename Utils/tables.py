@@ -60,6 +60,19 @@ TABLES = {
                 genre VARCHAR(50) UNIQUE
             )
         """
+    ),
+    'stats': (
+        """
+            CREATE TABLE stats (
+                stat_id INT AUTO_INCREMENT PRIMARY KEY,
+                artist_id INT UNIQUE,
+                artists_fans INT,
+                genre_id INT UNIQUE,
+                genres_fans INT,
+                FOREIGN KEY (artist_id) REFERENCES artists (artist_id),
+                FOREIGN KEY (genre_id) REFERENCES genres (genre_id)
+            )
+        """
     )}
 
 

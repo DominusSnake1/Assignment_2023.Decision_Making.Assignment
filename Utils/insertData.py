@@ -153,6 +153,38 @@ def insertRandomUserLikes(num_likes):
     cursor.close()
 
 
+def insertStatistics(artist):
+    cursor = uticon.__getDBCursor()
+
+    getArtistsID = 'SELECT artist_id FROM artists WHERE name = %(name)s'
+    cursor.execute(getArtistsID, {'name': artist})
+    artist_id = cursor.fetchone()
+
+    getArtistsFans = 'SELECT COUNT(user_id) FROM userlikes WHERE artist_id = %(id)s'
+    cursor.execute(getArtistsFans, {'id': artist_id[0]})
+    likes = cursor.fetchone()
+    artists_fans = likes[0]
+
+    getArtistsGenre = 'SELECT genre FROM artists WHERE name = %(name)s'
+    cursor.execute(getArtistsGenre, {'name': artist})
+    genre = cursor.fetchone()
+
+    getGenreFans = 'SELECT COUNT(user_id) FROM userlikes WHERE artist_id = %(id)s'
+
+    insertStats = 'INSERT INTO stats (artist_id, artists_fans) VALUES (%(artist_id)s, %(artists_fans)s)'
+
+    statsData = {
+        'artist_id': artist_id[0],
+        'artists_fans': artists_fans
+    }
+
+    cursor.execute(insertStats, statsData)
+    print("[Artist] with an ID \"{}\" has {} fans.".format(artist_id[0], artists_fans))
+
+    uticon.__commitDB()
+    cursor.close()
+
+
 def insertUserOwnsAlbum():
     cursor = uticon.__getDBCursor()
 
