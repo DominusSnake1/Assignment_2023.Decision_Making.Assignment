@@ -1,66 +1,26 @@
 import pandas as pd
-import mysql.connector as sqlcon
+from sqlalchemy import create_engine
 
 
-def generateStatistics(table):
-    connection = sqlcon.connect(
-        user='root',
-        password='password',
-        host='127.0.0.1',
-        database='music'
-    )
+def generateStatistics():
+    engine = create_engine('mysql+pymysql://root:password@127.0.0.1/music')
+    query = f'SELECT * FROM stats'
+    df = pd.read_sql_query(query, engine)
 
-    query = 'SELECT * FROM {}'.format(table)
-    df = pd.read_sql_query(query, connection)
+    average_fans_per_artist = df['artists_fans'].mean()
+    print("Average Number of Fans per Artist:\n", average_fans_per_artist)
 
-    # Calculate the mean
-    mean = df.mean()
+    genre_popularity = df.groupby('genre_id')['artists_fans'].sum()
+    print("Genre Popularity:\n", genre_popularity)
 
-    # # Calculate the median
-    # median = df.median()
-    #
-    # # Calculate the mode
-    # mode = df.mode().iloc[0]
-    #
-    # # Calculate the standard deviation
-    # std_dev = df.std()
-    #
-    # # Calculate the variance
-    # variance = df.var()
-    #
-    # # Calculate the range
-    # data_range = df.max() - df.min()
-    #
-    # # Calculate quartiles
-    # quartiles = df.quantile([0.25, 0.5, 0.75])
-    #
-    # # Calculate the count
-    # count = df.count()
-    #
-    # # Calculate skewness
-    # skewness = df.skew()
-    #
-    # # Calculate kurtosis
-    # kurtosis = df.kurtosis()
+    artist_popularity_by_genre = df.groupby(['genre_id', 'artist_id'])['artists_fans'].sum()
+    print("Artist Popularity by Genre:\n", artist_popularity_by_genre)
 
-    # Print the calculated statistics
-    print("Mean:")
-    print(mean)
-    # print("\nMedian:")
-    # print(median)
-    # print("\nMode:")
-    # print(mode)
-    # print("\nStandard Deviation:")
-    # print(std_dev)
-    # print("\nVariance:")
-    # print(variance)
-    # print("\nRange:")
-    # print(data_range)
-    # print("\nQuartiles:")
-    # print(quartiles)
-    # print("\nCount:")
-    # print(count)
-    # print("\nSkewness:")
-    # print(skewness)
-    # print("\nKurtosis:")
-    # print(kurtosis)
+    unique_genres = df['genre_id'].nunique()
+    print("Number of Unique Genres:\n", unique_genres)
+
+    correlation = df['genre_id'].corr(df['artists_fans'])
+    print("Correlation between Genre and Artists' Fans:\n", correlation)
+
+    dominant_genres = df['genre_id'].value_counts()
+    print("Dominant Genres by Artists:\n", dominant_genres)

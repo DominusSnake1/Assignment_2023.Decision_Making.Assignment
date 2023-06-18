@@ -38,8 +38,8 @@ TABLES = {
             CREATE TABLE userLikes (
                 user_id INT,
                 artist_id INT,
-                FOREIGN KEY (user_id) REFERENCES users (user_id),
-                FOREIGN KEY (artist_id) REFERENCES artists (artist_id)
+                FOREIGN KEY FK_ULtoU (user_id) REFERENCES users (user_id),
+                FOREIGN KEY FK_ULtoA (artist_id) REFERENCES artists (artist_id)
             )
         """
     ),
@@ -48,8 +48,8 @@ TABLES = {
             CREATE TABLE userOwnsAlbum (
                 user_id INT,
                 album_id INT,
-                FOREIGN KEY (user_id) REFERENCES users (user_id),
-                FOREIGN KEY (album_id) REFERENCES albums (album_id)
+                FOREIGN KEY FK_UOAtoU (user_id) REFERENCES users (user_id),
+                FOREIGN KEY FK_UOAtoA (album_id) REFERENCES albums (album_id)
             )
         """
     ),
@@ -67,10 +67,9 @@ TABLES = {
                 stat_id INT AUTO_INCREMENT PRIMARY KEY,
                 artist_id INT UNIQUE,
                 artists_fans INT,
-                genre_id INT UNIQUE,
+                genre_id INT,
                 genres_fans INT,
-                FOREIGN KEY (artist_id) REFERENCES artists (artist_id),
-                FOREIGN KEY (genre_id) REFERENCES genres (genre_id)
+                FOREIGN KEY (artist_id) REFERENCES artists (artist_id)
             )
         """
     )}

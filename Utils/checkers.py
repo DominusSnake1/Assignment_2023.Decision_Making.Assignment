@@ -1,38 +1,29 @@
-import numpy as np
 import pandas as pd
 import sqlalchemy as sa
+import Utils.connection as uticon
 
 
-def checkDataIssues(table):
+def checkDataIssues(tableName):
     engine = sa.create_engine('mysql+pymysql://root:password@127.0.0.1/music')
     with engine.connect() as connection:
-        query = 'SELECT * FROM {}'.format(table)
-        df = pd.read_sql_query(query, connection)
+        query = f"SELECT * FROM {tableName}"
+        df = pd.read_sql(query, connection)
 
-    missing_values = df.isnull().sum()
+    missing_values = df.isnull().any(axis=1)
     if missing_values.any():
-        print("Missing values found:")
-        print(missing_values)
+        print("Rows with Missing Values:")
+        print(df[missing_values])
+        df = df.dropna()
 
-        df.fillna(df.mean(), inplace=True)
+    duplicate_rows = df[df.duplicated()]
+    if not duplicate_rows.empty:
+        print("Duplicate Values:")
+        print(duplicate_rows)
+        df.drop_duplicates(inplace=True)
 
-    numeric_columns = df.select_dtypes(include=np.number).columns
+    # df.to_sql(tableName, engine, if_exists='replace', index=False)
 
-    duplicate_rows = df.duplicated(subset=numeric_columns)
-    if duplicate_rows.any():
-        print("Duplicate rows found:")
-        print(df[duplicate_rows])
+    engine.dispose()
 
-        df.drop_duplicates(subset=numeric_columns, inplace=True)
-
-    z_scores = np.abs((df[numeric_columns] - df[numeric_columns].mean()) / df[numeric_columns].std())
-    outlier_rows = (z_scores > 3).any(axis=1)
-    if outlier_rows.any():
-        print("Outlier rows found:")
-        print(df[outlier_rows])
-
-        df = df[~outlier_rows]
-
-    return df
 
 

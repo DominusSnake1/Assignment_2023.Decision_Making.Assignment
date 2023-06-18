@@ -1,6 +1,7 @@
 import random
 import Utils.connection as uticon
 import API.requestsAPI as api
+import Utils.checkers as chk
 
 
 def insertDataInDB():
@@ -44,6 +45,7 @@ def insertArtists():
         else:
             print("[Artist] \"{}\" successfully inserted!".format(name))
 
+    chk.checkDataIssues('artists')
     uticon.__commitDB()
     cursor.close()
 
@@ -67,6 +69,7 @@ def insertGenre(genre):
     else:
         print("[Genre] \"{}\" successfully inserted!".format(genre))
 
+    chk.checkDataIssues('genres')
     uticon.__commitDB()
     cursor.close()
 
@@ -94,6 +97,7 @@ def insertAlbums():
         else:
             print("[Album] \"{}\" by \"{}\" inserted.".format(album, artist))
 
+    chk.checkDataIssues('albums')
     uticon.__commitDB()
     cursor.close()
 
@@ -122,6 +126,7 @@ def insertRandomUsers(users):
         cursor.execute(addUser, dataUser)
         print("[User] \"{}\" inserted.".format(username))
 
+    chk.checkDataIssues('users')
     uticon.__commitDB()
     cursor.close()
 
@@ -149,38 +154,63 @@ def insertRandomUserLikes(num_likes):
         cursor.execute(addUserLikes, dataUserLikes)
         print("[User] with ID \"{}\" likes [Artist] with ID \"{}\".".format(user_id, artist_id))
 
+    chk.checkDataIssues('userLikes')
     uticon.__commitDB()
     cursor.close()
 
+    for id in artist_ids:
+        insertStatistics(id)
 
-def insertStatistics(artist):
+
+def insertStatistics(artist_id):
     cursor = uticon.__getDBCursor()
 
-    getArtistsID = 'SELECT artist_id FROM artists WHERE name = %(name)s'
-    cursor.execute(getArtistsID, {'name': artist})
-    artist_id = cursor.fetchone()
+    getArtistsFans = 'SELECT COUNT(user_id) FROM userlikes WHERE artist_id = %(artist_id)s'
 
-    getArtistsFans = 'SELECT COUNT(user_id) FROM userlikes WHERE artist_id = %(id)s'
-    cursor.execute(getArtistsFans, {'id': artist_id[0]})
-    likes = cursor.fetchone()
-    artists_fans = likes[0]
+    cursor.execute(getArtistsFans, {'artist_id': artist_id})
+    artists_fans = cursor.fetchone()
 
-    getArtistsGenre = 'SELECT genre FROM artists WHERE name = %(name)s'
-    cursor.execute(getArtistsGenre, {'name': artist})
-    genre = cursor.fetchone()
+    getGenreID = """
+        SELECT genres.genre_id
+            FROM genres
+            JOIN artists ON genres.genre = artists.genre
+            WHERE artists.artist_id = {}
+    """.format(artist_id)
 
-    getGenreFans = 'SELECT COUNT(user_id) FROM userlikes WHERE artist_id = %(id)s'
+    cursor.execute(getGenreID, {'artist_id': artist_id})
+    genreid = cursor.fetchone()[0]
 
-    insertStats = 'INSERT INTO stats (artist_id, artists_fans) VALUES (%(artist_id)s, %(artists_fans)s)'
+    getGenreFans = """
+            SELECT COUNT(userlikes.user_id) AS genre_fans
+                FROM genres
+                JOIN artists ON genres.genre = artists.genre
+                JOIN userlikes ON artists.artist_id = userlikes.artist_id
+                WHERE genres.genre_id = {}
+                GROUP BY genres.genre
+    """.format(genreid)
+
+    cursor.execute(getGenreFans, {'genre_id': genreid})
+    genreFans = cursor.fetchone()
+
+    insertStats = 'INSERT INTO stats (artist_id, artists_fans, genre_id, genres_fans) VALUES (%(artist_id)s, %(artists_fans)s, %(genre_id)s, %(genres_fans)s) ON DUPLICATE KEY UPDATE artists_fans = artists_fans + 1, genres_fans = genres_fans + 1'
 
     statsData = {
-        'artist_id': artist_id[0],
-        'artists_fans': artists_fans
+        'artist_id': artist_id,
+        'artists_fans': artists_fans[0],
+        'genre_id': genreid,
+        'genres_fans': genreFans[0]
     }
 
-    cursor.execute(insertStats, statsData)
-    print("[Artist] with an ID \"{}\" has {} fans.".format(artist_id[0], artists_fans))
+    try:
+        cursor.execute(insertStats, statsData)
+    except uticon.__getSQLConError() as err:
+        if err.errno == uticon.__getSQLConErrorcode().ER_DUP_ENTRY:
+            print("[Genre] with an ID \"{}\" already exists.".format(statsData['genre_id']))
+    else:
+        print("[Artist] with an ID \"{}\" has {} fans.".format(statsData['artist_id'], statsData['artists_fans']))
+        print("[Genre] with an ID \"{}\" has {} fans.".format(statsData['genre_id'], statsData['genres_fans']))
 
+    chk.checkDataIssues('stats')
     uticon.__commitDB()
     cursor.close()
 
@@ -208,5 +238,6 @@ def insertUserOwnsAlbum():
         cursor.execute(addOwnership, dataOwnership)
         print("[User] with ID \"{}\" owns [Album] with ID \"{}\".".format(user_id, album_id))
 
+    chk.checkDataIssues('userOwnsAlbum')
     uticon.__commitDB()
     cursor.close()
