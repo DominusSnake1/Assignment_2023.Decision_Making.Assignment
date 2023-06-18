@@ -1,6 +1,6 @@
 import mysql.connector as sqlcon
 from mysql.connector import errorcode
-import Utils.connection as uticon
+import DBCreation.connection as dbcon
 
 TABLES = {
     'users': (
@@ -76,8 +76,8 @@ TABLES = {
 
 
 def createTables():
-    cursor = uticon.__getDBCursor()
-    cursor.execute("USE {}".format(uticon.__getDBName()))
+    cursor = dbcon.__getDBCursor()
+    cursor.execute("USE {}".format(dbcon.__getDBName()))
 
     for tableName in TABLES:
         tableDescription = TABLES[tableName]

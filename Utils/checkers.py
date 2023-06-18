@@ -1,6 +1,5 @@
 import pandas as pd
 import sqlalchemy as sa
-import Utils.connection as uticon
 
 
 def checkDataIssues(tableName):
@@ -24,6 +23,3 @@ def checkDataIssues(tableName):
     # df.to_sql(tableName, engine, if_exists='replace', index=False)
 
     engine.dispose()
-
-
-

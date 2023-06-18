@@ -17,7 +17,7 @@ def __getEngine():
     return df
 
 
-def generateScatterPlot():
+def getScatterPlot():
     df = __getEngine()
     plt.scatter(df['artists_fans'], df['artist_id'])
     plt.xlabel('Artists Fans')
@@ -86,3 +86,4 @@ def getTimeSeries():
     # Print the decomposed components
     print("Residuals:")
     print(residuals.head())
+

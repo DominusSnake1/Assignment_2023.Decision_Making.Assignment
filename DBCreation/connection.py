@@ -50,7 +50,7 @@ def testConnection():
         else:
             print(err)
     else:
-        print("Successfully connected to the database!")
+        print("Successfully connected to the DBCreation!")
         con.close()
 
 
@@ -61,5 +61,5 @@ def createDatabase():
         print("Database \"{}\" was created successfully!".format(__getDBName()))
         cursor.execute("USE {}".format(__getDBName()))
     except sqlcon.Error as err:
-        print("Failed creating/accessing database: {}".format(err))
+        print("Failed creating/accessing DBCreation: {}".format(err))
         exit(1)
