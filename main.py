@@ -5,10 +5,15 @@ import Utils.statistics as stats
 import Utils.graphs as graphs
 
 
-uticon.testConnection()
-# utitab.createTables()
-# utidat.insertDataInDB()
+def main():
+    firstTimeSetup()
 
-graphs.generateScatterPlot()
-graphs.getTimeSeries()
-graphs.getARIMATrainingSplit()
+    graphs.generateScatterPlot()
+    graphs.getTimeSeries()
+    graphs.getARIMATrainingSplit()
+
+
+def firstTimeSetup():
+    uticon.testConnection()
+    utitab.createTables()
+    utidat.insertDataInDB()
