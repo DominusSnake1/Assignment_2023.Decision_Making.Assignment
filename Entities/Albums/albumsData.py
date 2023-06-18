@@ -2,7 +2,7 @@ import DBCreation.connection as dbcon
 import Utils.checkers as chk
 import API.requestsAPI as api
 
-# method which inserts the albums in the database
+# function which inserts the albums in the database
 def insertAlbums():
     """
        Inserts albums into the albums table in the database.

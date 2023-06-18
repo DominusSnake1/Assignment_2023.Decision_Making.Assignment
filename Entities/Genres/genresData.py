@@ -1,7 +1,7 @@
 import DBCreation.connection as dbcon
 import Utils.checkers as chk
 
-# method which inserts a genre in the database
+# function which inserts a genre in the database
 def insertGenre(genre):
     """
         Inserts a genre into the genres table in the database.

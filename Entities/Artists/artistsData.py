@@ -3,7 +3,7 @@ import Utils.checkers as chk
 import API.requestsAPI as api
 import Entities.Genres.genresData as gendat
 
-# method which inserts artists in the database
+# function which inserts artists in the database
 def insertArtists():
     """
        Inserts artists into the artists table in the database.
