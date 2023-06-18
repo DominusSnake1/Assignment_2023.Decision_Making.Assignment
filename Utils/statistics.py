@@ -3,15 +3,27 @@ from sqlalchemy import create_engine
 import DBCreation.connection as dbcon
 import Utils.checkers as chk
 
-
+# function which inserts or updates statistics for a specific artist
 def insertStatistics(artist_id):
+    """
+        Inserts or updates statistics for a specific artist.
+
+        Args:
+            artist_id (int): The ID of the artist.
+
+        Raises:
+            dbcon.__getSQLConError(): If there is an error with the SQL connection.
+    """
+
     cursor = dbcon.__getDBCursor()
 
+    # Get the number of fans for the specified artist
     getArtistsFans = 'SELECT COUNT(user_id) FROM userlikes WHERE artist_id = %(artist_id)s'
 
     cursor.execute(getArtistsFans, {'artist_id': artist_id})
     artists_fans = cursor.fetchone()
 
+    # Get the genre ID for the specified artist
     getGenreID = """
         SELECT genres.genre_id
             FROM genres
@@ -22,6 +34,7 @@ def insertStatistics(artist_id):
     cursor.execute(getGenreID, {'artist_id': artist_id})
     genreid = cursor.fetchone()[0]
 
+    # Get the number of fans for the genre of the specified artist
     getGenreFans = """
             SELECT COUNT(userlikes.user_id) AS genre_fans
                 FROM genres
@@ -34,6 +47,7 @@ def insertStatistics(artist_id):
     cursor.execute(getGenreFans, {'genre_id': genreid})
     genreFans = cursor.fetchone()
 
+    # Insert or update statistics for the artist and genre
     insertStats = 'INSERT INTO stats (artist_id, artists_fans, genre_id, genres_fans) VALUES (%(artist_id)s, %(artists_fans)s, %(genre_id)s, %(genres_fans)s) ON DUPLICATE KEY UPDATE artists_fans = artists_fans + 1, genres_fans = genres_fans + 1'
 
     statsData = {
@@ -56,12 +70,21 @@ def insertStatistics(artist_id):
     dbcon.__commitDB()
     cursor.close()
 
-
+# generate statistics based on the data in the stats table
 def generateStatistics():
+    """
+        Generates statistics based on the data in the "stats" table.
+
+    """
+
+    # Create an SQLAlchemy engine to connect to the database
     engine = create_engine('mysql+pymysql://root:password@127.0.0.1/music')
+
+    # Fetch the data from the "stats" table and create a pandas DataFrame
     query = f'SELECT * FROM stats'
     df = pd.read_sql_query(query, engine)
 
+    # Calculate various statistics using pandas DataFrame operations
     average_fans_per_artist = df['artists_fans'].mean()
     print("Average Number of Fans per Artist:\n", average_fans_per_artist)
 

@@ -11,6 +11,15 @@ FILE_LOCATION = './Assets/File_series.csv'
 
 
 def __getEngine():
+    """
+        Retrieves data from the 'stats' table in the MySQL database.
+
+        Returns:
+            pd.DataFrame: DataFrame containing the retrieved data.
+
+    """
+
+    # create the database engine and retrieve data from the stats table
     engine = create_engine('mysql+pymysql://root:password@127.0.0.1/music')
     query = 'SELECT * FROM stats'
     df = pd.read_sql_query(query, engine)
@@ -18,7 +27,14 @@ def __getEngine():
 
 
 def getScatterPlot():
+    """
+        Generates a scatter plot of 'artists_fans' against 'artist_id'.
+
+    """
+
     df = __getEngine()
+
+    # Create a scatter plot of 'artists_fans' against 'artist_id'
     plt.scatter(df['artists_fans'], df['artist_id'])
     plt.xlabel('Artists Fans')
     plt.ylabel('Artists IDs')
@@ -27,30 +43,40 @@ def getScatterPlot():
 
 
 def getARIMATrainingSplit():
-    # Διαβάστε τα δεδομένα από το αρχείο CSV
+    """
+        Trains an ARIMA model and evaluates its performance on a test set.
+
+    """
+
+    # read the data from the csv file
     df = pd.read_csv(FILE_LOCATION)
 
-    # Χωρίστε τα δεδομένα σε σύνολα εκπαίδευσης και ελέγχου
+    # split the data into training and testing sets
     train_data, test_data = train_test_split(df['values'], test_size=0.24, shuffle=False)
 
-    # Εκπαίδευση ARIMA μοντέλου
+    # train the ARIMA model
     model = ARIMA(train_data, order=(1, 0, 0))  # Παράδειγμα: ARIMA(1, 0, 0)
     model_fit = model.fit()
 
-    # Προβλέψεις στο σύνολο ελέγχου
+    # make predictions on the test set
     predictions = model_fit.predict(start=len(train_data), end=len(train_data) + len(test_data) - 1)
 
-    # Αξιολόγηση της απόδοσης
+    # evaluate the performance
     mse = mean_squared_error(test_data, predictions)
     rmse = np.sqrt(mse)
     print("Root Mean Squared Error (RMSE):", rmse)
 
 
 def getTimeSeries():
-    # Read the values from a file
+    """
+        Performs time series analysis on the values from a CSV file.
+
+    """
+
+    # Read the values from a csv file
     df = pd.read_csv(FILE_LOCATION)
 
-    # Assuming your file has a column named 'values' that contains the values
+    # Create a DataFrame with a column containing the values from the 'values' column in the DataFrame 'df'
     series = pd.DataFrame({'values': df['values']})
 
     # Generate a date range based on the length of the series

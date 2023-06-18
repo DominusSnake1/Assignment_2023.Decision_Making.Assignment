@@ -2,6 +2,7 @@ import mysql.connector as sqlcon
 from mysql.connector import errorcode
 import DBCreation.connection as dbcon
 
+# table templates
 TABLES = {
     'users': (
         """
@@ -74,8 +75,12 @@ TABLES = {
         """
     )}
 
-
+# create the tables in the database using the templates above
 def createTables():
+    """
+        Creates tables in the database based on the table templates.
+
+    """
     cursor = dbcon.__getDBCursor()
     cursor.execute("USE {}".format(dbcon.__getDBName()))
 
