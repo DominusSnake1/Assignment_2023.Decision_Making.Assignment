@@ -17,3 +17,7 @@ def firstTimeSetup():
     uticon.testConnection()
     utitab.createTables()
     utidat.insertDataInDB()
+
+
+if __name__ == '__main__':
+    main()
